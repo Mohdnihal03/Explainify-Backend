@@ -193,8 +193,15 @@ async def post_transcript(request: VideoRequest):
         # Create semantic chunks with optimized parameters
         chunker = SemanticChunker(w=w, k=k)
         
-        # Get chunks with metadata (includes chunk_id, word_count, etc.)
-        chunks_with_metadata = chunker.chunk_with_metadata(cleaned_transcript, video_id)
+        # Get chunks with metadata and overlapping for better RAG performance
+        # use_overlap=True enables sliding window (25 word overlap between chunks)
+        # This improves context retrieval for Q&A systems
+        chunks_with_metadata = chunker.chunk_with_metadata(
+            cleaned_transcript, 
+            video_id=video_id,
+            use_overlap=True,  # Enable overlapping chunks for RAG
+            overlap_words=25   # 25 word overlap between consecutive chunks
+        )
         
         # Create a directory for this video's chunks
         # Example: chunks/dQw4w9WgXcQ/

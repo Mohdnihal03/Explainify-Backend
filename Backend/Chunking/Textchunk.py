@@ -133,47 +133,120 @@ class SemanticChunker:
         # Join blocks with double newline
         return '\n\n'.join(blocks)
     
-    def _fallback_chunking(self, text: str, target_sentences: int = 15) -> List[str]:
+    def _fallback_chunking(self, text: str, target_sentences: int = 15, 
+                           min_words: int = 100, max_words: int = 300) -> List[str]:
         """
         Fallback chunking method if TextTiling fails.
-        Groups sentences into chunks of approximately target_sentences.
+        Groups sentences into chunks with size constraints for better RAG performance.
         
         Args:
             text (str): The input text
-            target_sentences (int): Approximate number of sentences per chunk
+            target_sentences (int): Approximate number of sentences per chunk (default: 15)
+            min_words (int): Minimum words per chunk (default: 100)
+            max_words (int): Maximum words per chunk (default: 300)
         
         Returns:
-            List[str]: List of text chunks
+            List[str]: List of text chunks with consistent sizing
+        
+        IMPROVEMENTS:
+        - Ensures chunks meet minimum size requirement for context
+        - Prevents chunks from becoming too large for retrieval
+        - Better quality chunks for RAG systems
         """
         # Split text into sentences using basic punctuation
         sentences = nltk.sent_tokenize(text)
         
-        # Group sentences into chunks
+        # Group sentences into chunks with size constraints
         chunks = []
         current_chunk = []
         
         for i, sentence in enumerate(sentences):
             # Add sentence to current chunk
             current_chunk.append(sentence)
+            chunk_text = ' '.join(current_chunk)
+            word_count = len(chunk_text.split())
             
-            # If we've reached target size, save chunk and start new one
-            if (i + 1) % target_sentences == 0:
-                chunks.append(' '.join(current_chunk))
+            # Save chunk if it meets size requirements or is the last batch
+            if word_count >= min_words and (i == len(sentences) - 1 or word_count >= max_words):
+                chunks.append(chunk_text)
+                current_chunk = []
+            elif (i + 1) % target_sentences == 0 and word_count >= min_words:
+                # Also save if target sentences reached and minimum size met
+                chunks.append(chunk_text)
                 current_chunk = []
         
-        # Add remaining sentences as final chunk
+        # Add remaining sentences as final chunk if large enough
         if current_chunk:
-            chunks.append(' '.join(current_chunk))
+            final_chunk = ' '.join(current_chunk)
+            if len(final_chunk.split()) >= min_words or not chunks:
+                chunks.append(final_chunk)
+            elif chunks:
+                # Otherwise merge with last chunk
+                chunks[-1] += ' ' + final_chunk
         
         return chunks
     
-    def chunk_with_metadata(self, text: str, video_id: str = None) -> List[Dict]:
+    
+    def chunk_with_overlap(self, text: str, overlap_words: int = 25) -> List[str]:
+        """
+        Create chunks with overlapping content (sliding window approach).
+        This improves RAG performance by maintaining context across chunk boundaries.
+        
+        Args:
+            text (str): The input text to chunk
+            overlap_words (int): Number of words to overlap between chunks (default: 25)
+        
+        Returns:
+            List[str]: List of overlapping text chunks
+        
+        WHY OVERLAP?
+        -----------
+        - Prevents context loss at chunk boundaries
+        - Improves RAG retrieval quality
+        - Ensures answers that span multiple chunks are captured
+        - Better context for LLM generation
+        
+        EXAMPLE:
+        Without overlap: "...makes predictions." | "ML powers..."
+        With overlap:    "...makes predictions. ML powers..." (25 word overlap)
+        """
+        # First, get the base chunks from TextTiling
+        base_chunks = self.chunk_text(text)
+        
+        if len(base_chunks) <= 1:
+            return base_chunks
+        
+        # Create overlapped chunks using sliding window
+        overlapped_chunks = []
+        
+        for i in range(len(base_chunks)):
+            if i == 0:
+                # First chunk stays as is
+                overlapped_chunks.append(base_chunks[i])
+            else:
+                # For subsequent chunks, prepend the last N words from previous chunk
+                prev_words = base_chunks[i - 1].split()
+                current_words = base_chunks[i].split()
+                
+                # Get overlap from previous chunk (last N words)
+                overlap_text = ' '.join(prev_words[-overlap_words:])
+                
+                # Combine: previous chunk end + current chunk
+                combined = overlap_text + ' ' + base_chunks[i]
+                overlapped_chunks.append(combined.strip())
+        
+        return overlapped_chunks
+    
+    def chunk_with_metadata(self, text: str, video_id: str = None, use_overlap: bool = True, 
+                           overlap_words: int = 25) -> List[Dict]:
         """
         Chunk text and return chunks with metadata for verification and storage.
         
         Args:
             text (str): The input text to chunk
             video_id (str): Optional video ID for tracking
+            use_overlap (bool): Whether to use overlapping chunks (default: True for RAG)
+            overlap_words (int): Number of words to overlap (default: 25)
         
         Returns:
             List[Dict]: List of chunk dictionaries with metadata
@@ -184,9 +257,13 @@ class SemanticChunker:
         - word_count: Number of words in chunk
         - char_count: Number of characters
         - video_id: Associated video ID
+        - has_overlap: Whether this chunk includes overlap from previous
         """
-        # Get the text chunks
-        chunks = self.chunk_text(text)
+        # Get chunks with or without overlap
+        if use_overlap:
+            chunks = self.chunk_with_overlap(text, overlap_words=overlap_words)
+        else:
+            chunks = self.chunk_text(text)
         
         # Create metadata for each chunk
         chunks_with_metadata = []
@@ -202,7 +279,8 @@ class SemanticChunker:
                 "text": chunk,
                 "word_count": word_count,
                 "char_count": char_count,
-                "video_id": video_id
+                "video_id": video_id,
+                "has_overlap": (i > 0 and use_overlap)  # Track if chunk includes overlap
             }
             
             chunks_with_metadata.append(chunk_data)
@@ -374,14 +452,42 @@ if __name__ == "__main__":
     and maintainable.
     """
     
-    # Create chunker
-    chunker = SemanticChunker(w=10, k=5)  # Smaller params for demo
+    # Create chunker with optimized parameters for educational content
+    chunker = SemanticChunker(w=15, k=8)  # More granular for education videos
     
-    # Chunk the text
+    # Example 1: Basic chunking without overlap
+    print("=" * 80)
+    print("EXAMPLE 1: Basic Chunking (No Overlap)")
+    print("=" * 80)
     chunks = chunker.chunk_text(sample_transcript)
-    
-    # Verify chunking
     verification = verify_chunking(sample_transcript, chunks)
-    
-    # Print report
     print_chunking_report(chunks, verification)
+    
+    # Example 2: Chunking with overlap for RAG systems
+    print("\n" + "=" * 80)
+    print("EXAMPLE 2: Chunking with Overlap (Recommended for RAG)")
+    print("=" * 80)
+    overlapped_chunks = chunker.chunk_with_overlap(sample_transcript, overlap_words=25)
+    print(f"Total Overlapped Chunks: {len(overlapped_chunks)}\n")
+    for i, chunk in enumerate(overlapped_chunks):
+        word_count = len(chunk.split())
+        preview = chunk[:100] + "..." if len(chunk) > 100 else chunk
+        overlap_marker = "🔄 [OVERLAP]" if i > 0 else "🆕 [FIRST]"
+        print(f"--- Chunk {i + 1} {overlap_marker} ---")
+        print(f"Words: {word_count}")
+        print(f"Preview: {preview}\n")
+    
+    # Example 3: Chunks with metadata and overlap
+    print("=" * 80)
+    print("EXAMPLE 3: Chunks with Metadata (For Vector Storage)")
+    print("=" * 80)
+    chunks_with_meta = chunker.chunk_with_metadata(
+        sample_transcript, 
+        video_id="demo_video_123",
+        use_overlap=True,
+        overlap_words=25
+    )
+    for chunk_data in chunks_with_meta:
+        print(f"Chunk {chunk_data['chunk_id']}: {chunk_data['word_count']} words " +
+              f"(Overlap: {chunk_data['has_overlap']})")
+        print(f"  Preview: {chunk_data['text'][:80]}...\n")
