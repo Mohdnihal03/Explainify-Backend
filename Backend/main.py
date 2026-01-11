@@ -69,10 +69,15 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
+# Include enhanced ask router (after app and middleware setup)
+from enhanced_ask import router as enhanced_router
+app.include_router(enhanced_router)
 
-# Dictionary to store transcripts in memory (video_id: transcript_text)
+
+# Dictionary to store transcripts with timestamp data in memory
+# Format: {video_id: {"text": "...", "segments": [...], "title": "..."}}
 # In production, you would use a database instead
-transcript_storage: Dict[str, str] = {}
+transcript_storage: Dict[str, Dict] = {}
 
 
 # Define a Pydantic model for the POST request
@@ -89,8 +94,9 @@ class QuestionRequest(BaseModel):
     """
     question: str
     video_id: Optional[str] = None
-    n_results: Optional[int] = 5
-    chat_history: Optional[List[Dict[str, str]]] = []
+    n_results: Optional[int] = 3
+    chat_history: Optional[List[Dict]] = []  # Accept any dict structure for flexibility
+
 
 
 # Define a Pydantic model for the response
@@ -110,6 +116,33 @@ class AnswerResponse(BaseModel):
     success: bool
     answer: Optional[str] = None
     context: Optional[List[Dict]] = None
+    error: Optional[str] = None
+
+class TimestampRange(BaseModel):
+    """
+    Data model for timestamp ranges in citations.
+    """
+    start: float
+    end: float
+    formatted: str  # e.g., "02:14 – 03:05"
+
+class Citation(BaseModel):
+    """
+    Data model for a single citation with timestamp.
+    """
+    video_id: str
+    video_title: Optional[str] = None
+    text: str
+    timestamp_range: TimestampRange
+    relevance_score: float
+
+class EnhancedAnswerResponse(BaseModel):
+    """
+    Enhanced Q&A response with citations and timestamps.
+    """
+    success: bool
+    answer: Optional[str] = None
+    citations: Optional[List[Citation]] = []
     error: Optional[str] = None
 
 
@@ -140,17 +173,21 @@ async def post_transcript(request: VideoRequest):
                 error="Invalid YouTube URL"
             )
         
-        # Fetch the raw transcript using the video ID
-        raw_transcript = fetcher.get_transcript_from_url(request.url)
+        # Fetch the transcript WITH timestamps using the new method
+        transcript_data = fetcher.get_transcript_with_timestamps(request.url)
         
         # Check if transcript was successfully fetched
-        if not raw_transcript:
+        if not transcript_data:
             # Return an error response if transcript is unavailable
             return TranscriptResponse(
                 success=False,
                 video_id=video_id,
                 error="Could not fetch transcript"
             )
+        
+        # Extract components from transcript data
+        raw_transcript = transcript_data['text']
+        transcript_segments = transcript_data['segments']  # Preserve timestamps
         
         # Clean the transcript using the TranscriptCleaner
         # This removes filler words, extra spaces, repeated words, etc.
@@ -193,15 +230,18 @@ async def post_transcript(request: VideoRequest):
         # Create semantic chunks with optimized parameters
         chunker = SemanticChunker(w=w, k=k)
         
-        # Get chunks with metadata and overlapping for better RAG performance
+        # Get chunks with metadata, timestamps, and overlapping for better RAG performance
         # use_overlap=True enables sliding window (25 word overlap between chunks)
         # This improves context retrieval for Q&A systems
         chunks_with_metadata = chunker.chunk_with_metadata(
             cleaned_transcript, 
             video_id=video_id,
+            transcript_segments=transcript_segments,  # NEW: Pass timestamp data
+            video_title=f"Video {video_id}",  # TODO: Extract actual title from YouTube API
             use_overlap=True,  # Enable overlapping chunks for RAG
             overlap_words=25   # 25 word overlap between consecutive chunks
         )
+
         
         # Create a directory for this video's chunks
         # Example: chunks/dQw4w9WgXcQ/
@@ -236,8 +276,13 @@ async def post_transcript(request: VideoRequest):
         # This automatically converts text to embeddings and stores them
         vector_store.add_chunks(chunks_with_metadata)
         
-        # Store the cleaned transcript in memory as well (for quick access)
-        transcript_storage[video_id] = cleaned_transcript
+        # Store the transcript data with timestamps in memory (for quick access)
+        transcript_storage[video_id] = {
+            "text": cleaned_transcript,
+            "segments": transcript_segments,
+            "title": f"Video {video_id}"  # TODO: Extract actual title
+        }
+
         
         # Return a successful response with the cleaned transcript
         return TranscriptResponse(
@@ -309,6 +354,30 @@ async def ask_question(request: QuestionRequest):
         )
 
 
+# GET endpoint - List all processed videos
+@app.get("/videos")
+async def list_videos():
+    """
+    Get a list of all processed videos.
+    
+    Returns:
+        List of video metadata for all processed videos
+    """
+    videos = []
+    for video_id, data in transcript_storage.items():
+        videos.append({
+            "video_id": video_id,
+            "title": data.get("title", f"Video {video_id}"),
+            "word_count": len(data.get("text", "").split()),
+            "has_segments": len(data.get("segments", [])) > 0
+        })
+    
+    return {
+        "success": True,
+        "count": len(videos),
+        "videos": videos
+    }
+
 
 # GET endpoint - Retrieve a stored transcript by video ID
 @app.get("/transcript/{video_id}")
@@ -324,11 +393,11 @@ async def get_transcript(video_id: str):
     """
     # Check if the video_id exists in our storage
     if video_id in transcript_storage:
-        # Return the stored transcript
+        # Return the stored transcript text
         return TranscriptResponse(
             success=True,
             video_id=video_id,
-            transcript=transcript_storage[video_id]
+            transcript=transcript_storage[video_id]["text"]  # Extract text from structured storage
         )
     else:
         # Return error if transcript not found
@@ -337,6 +406,7 @@ async def get_transcript(video_id: str):
             video_id=video_id,
             error="Transcript not found. Please POST the URL first."
         )
+
 
 
 # Entry point for running the application

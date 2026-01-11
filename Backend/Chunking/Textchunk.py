@@ -237,7 +237,10 @@ class SemanticChunker:
         
         return overlapped_chunks
     
-    def chunk_with_metadata(self, text: str, video_id: str = None, use_overlap: bool = True, 
+    def chunk_with_metadata(self, text: str, video_id: str = None, 
+                           transcript_segments: List[Dict] = None,
+                           video_title: str = "",
+                           use_overlap: bool = True, 
                            overlap_words: int = 25) -> List[Dict]:
         """
         Chunk text and return chunks with metadata for verification and storage.
@@ -245,6 +248,9 @@ class SemanticChunker:
         Args:
             text (str): The input text to chunk
             video_id (str): Optional video ID for tracking
+            transcript_segments (List[Dict]): Original transcript segments with timestamps
+                Format: [{"text": "...", "start": 0.0, "duration": 2.5}, ...]
+            video_title (str): Title of the video for citation display
             use_overlap (bool): Whether to use overlapping chunks (default: True for RAG)
             overlap_words (int): Number of words to overlap (default: 25)
         
@@ -257,8 +263,14 @@ class SemanticChunker:
         - word_count: Number of words in chunk
         - char_count: Number of characters
         - video_id: Associated video ID
+        - video_title: Video title for citations
+        - start_time: Start timestamp in seconds (if segments provided)
+        - end_time: End timestamp in seconds (if segments provided)
         - has_overlap: Whether this chunk includes overlap from previous
         """
+        # Import timestamp mapper for mapping chunks to timestamps
+        from timestamp_mapper import TimestampMapper
+        
         # Get chunks with or without overlap
         if use_overlap:
             chunks = self.chunk_with_overlap(text, overlap_words=overlap_words)
@@ -280,12 +292,25 @@ class SemanticChunker:
                 "word_count": word_count,
                 "char_count": char_count,
                 "video_id": video_id,
+                "video_title": video_title,
                 "has_overlap": (i > 0 and use_overlap)  # Track if chunk includes overlap
             }
+            
+            # Add timestamp data if transcript segments are provided
+            if transcript_segments:
+                start_time, end_time = TimestampMapper.map_chunk_to_timestamps(
+                    chunk, transcript_segments
+                )
+                chunk_data["start_time"] = start_time
+                chunk_data["end_time"] = end_time
+            else:
+                chunk_data["start_time"] = 0.0
+                chunk_data["end_time"] = 0.0
             
             chunks_with_metadata.append(chunk_data)
         
         return chunks_with_metadata
+
     
     def get_chunking_stats(self, chunks: List[str]) -> Dict:
         """
