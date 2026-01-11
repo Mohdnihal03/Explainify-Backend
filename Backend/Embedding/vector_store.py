@@ -54,7 +54,10 @@ class VectorStore:
             meta = {
                 "video_id": chunk.get('video_id', 'unknown'),
                 "chunk_id": chunk.get('chunk_id', 0),
-                "word_count": chunk.get('word_count', 0)
+                "word_count": chunk.get('word_count', 0),
+                "start_time": chunk.get('start_time', 0.0),  # NEW: For timestamp attribution
+                "end_time": chunk.get('end_time', 0.0),      # NEW: For timestamp attribution
+                "video_title": chunk.get('video_title', '')  # NEW: For citation display
             }
             metadatas.append(meta)
             
@@ -62,6 +65,7 @@ class VectorStore:
             # Format: video_id_chunk_id
             unique_id = f"{chunk.get('video_id', 'unknown')}_{chunk.get('chunk_id', 0)}"
             ids.append(unique_id)
+
             
         # Add to collection
         # ChromaDB automatically handles tokenization and embedding generation
@@ -121,6 +125,52 @@ class VectorStore:
         self.collection.delete(
             where={"video_id": video_id}
         )
+    
+    def search_multi_video(
+        self, 
+        query: str, 
+        n_results: int = 5,
+        video_ids: Optional[List[str]] = None
+    ) -> List[Dict]:
+        """
+        Search across multiple videos or all videos if video_ids is None.
+        
+        Args:
+            query (str): The search query (question)
+            n_results (int): Number of results to return
+            video_ids (List[str]): Optional list of video IDs to search within.
+                                   If None, searches across all videos.
+            
+        Returns:
+            List[Dict]: List of relevant chunks with their metadata, grouped by video
+        """
+        # Prepare filter if video_ids is provided
+        where_filter = None
+        if video_ids:
+            # ChromaDB uses $in operator for multiple values
+            where_filter = {"video_id": {"$in": video_ids}}
+        
+        # Perform search
+        results = self.collection.query(
+            query_texts=[query],
+            n_results=n_results,
+            where=where_filter
+        )
+        
+        # Format results
+        formatted_results = []
+        
+        if results['documents']:
+            for i in range(len(results['documents'][0])):
+                formatted_results.append({
+                    "text": results['documents'][0][i],
+                    "metadata": results['metadatas'][0][i],
+                    "id": results['ids'][0][i],
+                    "distance": results['distances'][0][i] if results['distances'] else None
+                })
+                
+        return formatted_results
+
 
 # Example usage
 if __name__ == "__main__":

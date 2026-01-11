@@ -134,6 +134,47 @@ class YouTubeTranscriptFetcher:
         
         # Return the formatted transcript
         return formatted_transcript
+    
+    @classmethod
+    def get_transcript_with_timestamps(cls, url: str, languages: List[str] = ['en']) -> Optional[Dict]:
+        """
+        Get transcript with timestamp data preserved for citation attribution.
+        
+        Args:
+            url (str): The YouTube video URL
+            languages (List[str]): List of preferred language codes (default: ['en'])
+        
+        Returns:
+            Optional[Dict]: Dictionary containing:
+                - 'text': Formatted transcript text
+                - 'segments': List of segments with timestamps [{"text": "...", "start": 0.0, "duration": 2.5}, ...]
+                - 'video_id': The YouTube video ID
+            Returns None if unable to fetch
+        """
+        # Step 1: Extract the video ID from the URL
+        video_id = cls.extract_video_id(url)
+        
+        # If video ID extraction failed, return None
+        if not video_id:
+            print("Invalid YouTube URL: Could not extract video ID")
+            return None
+        
+        # Step 2: Fetch the raw transcript data using the video ID
+        transcript_data = cls.get_transcript(video_id, languages)
+        
+        # If transcript fetching failed, return None
+        if not transcript_data:
+            return None
+        
+        # Step 3: Format the transcript data into a readable string
+        formatted_transcript = cls.format_transcript(transcript_data)
+        
+        # Return both formatted text and raw segments with timestamps
+        return {
+            'text': formatted_transcript,
+            'segments': transcript_data,  # Preserves 'text', 'start', 'duration' for each segment
+            'video_id': video_id
+        }
 
 
 # Example usage (for testing purposes)
