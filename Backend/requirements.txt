@@ -1,0 +1,29 @@
+# FastAPI - Modern web framework for building APIs
+fastapi
+
+# Uvicorn - ASGI server for running FastAPI applications
+uvicorn
+
+# Pydantic - Data validation using Python type hints
+pydantic
+
+# YouTube Transcript API - Library to fetch YouTube video transcripts
+youtube-transcript-api
+
+# Google Generative AI - SDK for Google's Gemini AI models
+google-generativeai
+
+# Python-dotenv - Load environment variables from .env file
+python-dotenv
+
+# Requests - HTTP library for making API requests
+requests
+
+# NLTK - Natural Language Toolkit for text processing and semantic chunking
+nltk
+
+# ChromaDB - Vector database for storing and retrieving embeddings
+chromadb
+
+# Sentence Transformers - For generating embeddings locally (optional if using Gemini)
+sentence-transformers

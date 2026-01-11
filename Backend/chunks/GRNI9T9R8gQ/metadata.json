@@ -1,0 +1,100 @@
+[
+  {
+    "chunk_id": 0,
+    "text": "Hey friends, so what is python? So now let's start with basics. What is programming language? So now imagine that you want to give your computer a task and you say, \"hey computer, calculate 5 + 5. \" well, your computer will not understand what is exactly are talking about and nothing going to happen. So we cannot use the natural human language in order to give tasks for your pc. So now instead of that, we have to give the instructions in a language where the computer understand. We write a short piece of code for example here in python print 5 + 5. Now the computer going to understand the instruction and give us the result 10. So a program it is set of instructions that is written in a language the computer can follow.",
+    "word_count": 137,
+    "char_count": 728,
+    "video_id": "GRNI9T9R8gQ"
+  },
+  {
+    "chunk_id": 1,
+    "text": "But my friend not all languages are the same. Some are made for people and others are made for machines. So now at the top we have the natural language you say hey please calculate 5 + 5. And we have a lot of natural languages. We have the english, spanish, hindi. They are easy for us but far too complex for computer to understand. Now moving on then we have the highlevel languages. So they are programming languages but they are made for human because they are very simplified, logical and really easy to write and to read. And we have a lot of languages python and javascript. They are high-level languages. And now next we are going lower. We are going to the low-level languages. Programming languages can talk directly to the machines, but they are really hard for humans. It's hard to read, to write, and as well to understand. And here we have examples the assembly and the c language. And now at the very bottom, we have the machine language. And this one is made of binary code, a combination of ones and zeros. And this is exactly what your computer can understand. But it is impossible for humans to read it, to understand it, to write it. So now if you look at these levels each step down it going to bring us closer on how the machine thinks and each step up it going to bring us closer on how human thinks.",
+    "word_count": 249,
+    "char_count": 1323,
+    "video_id": "GRNI9T9R8gQ"
+  },
+  {
+    "chunk_id": 2,
+    "text": "So now if you're looking at python the highle language it is closer to the natural language than the machine language. So that means it is really easy to learn and write and it's an abstraction that hides the complexity of low-level and machine languages. So it's a bridge between both worlds. So this is exactly what are programming languages and what is python. So now i would you to understand exactly how python works.",
+    "word_count": 75,
+    "char_count": 422,
+    "video_id": "GRNI9T9R8gQ"
+  },
+  {
+    "chunk_id": 3,
+    "text": "So let's say you open your editor and you start writing python code and usually we write the code inside a python file with the file extension of py. So here you are writing the source code. Once you run your code, the computer cannot immediately execute your instructions cuz it is really high level and the computer needs a lower level of the code. So what happens? There is something called compiler in python. It's going to take your python code and translate it to another code. It's called the pyite code with the extension pyc python compiled. And this can happen automatically and you will not even notice it. So what happened here? The compiler of python going to translate the highlevel language the python code to a low-level language the bite code. So as you can see it's really hard to understand the bite code compared to the python code. So now our code is not yet executed, python just did a translation. But now before anything to be executed, what can happen? Python might as well link some libraries. It is pre-written chunks of code that helps your code to do something specific working with files, handling data and so on. Now python has everything the bite code, the libraries and now python can run your bite code using something called python virtual machine. So it's a software that can understand the bite code of python and take care of running it. So the python virtual machine going to finally converts your instructions into machine codes once and zero because this is the only thing that your computer can really understand. And once it runs you will see at the results whatever your program was designed to do. And now all those three steps compile, translate and execute we call them the python interpreter.",
+    "word_count": 308,
+    "char_count": 1740,
+    "video_id": "GRNI9T9R8gQ"
+  },
+  {
+    "chunk_id": 4,
+    "text": "So it's a toolbox that handles everything needed to run a python code. So again my friend you write python code in a high language then python compiles it and translate it into the byte code the low language and then the virtual machine going to take care of everything going to take your bite code some libraries and then it going to run it at your computer to see the results. So this process happens every time you run a python code and everything is of course automated and behind the scenes. So now let's talk about why we should learn python in the first place. There are too many programming languages out there.",
+    "word_count": 115,
+    "char_count": 619,
+    "video_id": "GRNI9T9R8gQ"
+  },
+  {
+    "chunk_id": 5,
+    "text": "So why millions of people choose python? So the first and most important reason is python is very powerful and as well at the same time very simple. You can build really serious stuff with few line of codes. So if you compare java and python, in java or c++ you're going to write a lot of lines in order to do a simple task compared to python where you need only one or two line. So as you can see python is very simple compared to other programming languages. Moving on to the second reason. Python is used everywhere and you can use it in order to build everything. So you can use it to build websites, to automate tasks, to work with data, to build games and even control robots. So whatever direction you want to go in tech, you will find probably python. Moving on to the next one. One of the best things about python is the community. You are my friend, never alone. There are thousands of developers and experts me sharing their knowledge in tutorials or they are writing blog posts and as well developing and sharing free libraries, open-source projects in github. And if you are stuck or have any complex task, i'm sure there is someone already solved it and probably made a youtube video or a github repo about it. So this type of community makes the language alive. And when it comes to ai, python is leading the way. Almost everything you hear about today shbt, image generations, self-driven car models, it's built with python because python has an incredible ecosystem for ai and machine learning. So my friends this means the programming language of ai is python and if you are interested in the future then python is the language. And now because of all these reasons python is one of the most in demand programming language in the world now. If you check any job description in the tech world you will see everyone across all industries finance, healthcare, logistics, car manufacturing, everyone is requesting python skill.",
+    "word_count": 349,
+    "char_count": 1941,
+    "video_id": "GRNI9T9R8gQ"
+  },
+  {
+    "chunk_id": 6,
+    "text": "So my friends python is really easy to learn has incredible use cases. It is shaping the future with the ai. It has huge community and it is amazing for your career. So this is exactly why millions learns and works with python. So now i hope that i got you motivated to learn python and i will not leave you there.",
+    "word_count": 62,
+    "char_count": 314,
+    "video_id": "GRNI9T9R8gQ"
+  },
+  {
+    "chunk_id": 7,
+    "text": "I'm going to show you now how to learn python. So python is a journey and every journey needs a road map. So now everyone everybody going to start from the same place. Every expert, a data engineer, ai, web, gaming developers, everyone has to start at the same place. Everyone has to learn how to write a simple code, understand variables, how to work with data types, how to control the flow of your codes and as well you have to learn about the functions and how to organize your code into small reusable blocks.",
+    "word_count": 96,
+    "char_count": 514,
+    "video_id": "GRNI9T9R8gQ"
+  },
+  {
+    "chunk_id": 8,
+    "text": "So this stage builds your foundation. And now after that, everyone has to go to the intermediate level. Now we're going to level things up. We're going to start learning how to handle errors and exceptions, how to structure your code using the oop, object-oriented programming, how to split your projects into modules, and how to work with files and many other stuff. So at this phase, you start feeling how your code is getting more professional, more a real developer.",
+    "word_count": 81,
+    "char_count": 470,
+    "video_id": "GRNI9T9R8gQ"
+  },
+  {
+    "chunk_id": 9,
+    "text": "So things can make more sense here. And now after that, everyone going to start moving to the advanced level. And here you can start learning advanced techniques. We're going to go outside of our code in order to connect ourselves with apis in order to grab data from the internet and we're going to learn stuff how to test your codes and how to scrap website to collect data automatically and at this level you're going to start doing real projects and solving real problems. So now as you can see all those three levels they are the core of python and everyone must learn these techniques because everyone need those techniques in whatever you are building in the future.",
+    "word_count": 121,
+    "char_count": 673,
+    "video_id": "GRNI9T9R8gQ"
+  },
+  {
+    "chunk_id": 10,
+    "text": "And now after that of course we cannot keep learning everything. It's going to be really impossible. So you have to really make thoughts about which path you want to follow the direction that match your interest and your career goals. So you have to pick your path and there are a lot of options for example you could be a data engineer. If you'd to work with pipelines automations moving data around then you have to learn something sparkl processes and automations with python.",
+    "word_count": 85,
+    "char_count": 479,
+    "video_id": "GRNI9T9R8gQ"
+  },
+  {
+    "chunk_id": 11,
+    "text": "Another path you can use python for data science if you enjoy working with data charts insights. If yes then you're going to be working with libraries pandas numpy and plotty in order to analyze and visual your data. If you want to go deeper and build smart systems and models then you have to work with python libraries pytorch transformers and tensorflow and another option and path you could use python for web development. So if you want to build websites and web apps then you can use python libraries and frameworks flask, django and requests. And of course not only those four we have a lot of other options using python for game development.",
+    "word_count": 116,
+    "char_count": 649,
+    "video_id": "GRNI9T9R8gQ"
+  },
+  {
+    "chunk_id": 12,
+    "text": "But as you can see at the expert level at the side going to be almost impossible to learn all those libraries. So now if i look to this and tell you about my journey. So i learned everything in python about data engineering and then with the time i start picking few libraries from the other options from the data science i learned the plotty and the pandas and from the ai and machine learning the transformers. So i'm going to recommend you to pick first a path make yourself an expert there and with the time start exploring the other stuff. All so now let's take it step by step.",
+    "word_count": 112,
+    "char_count": 583,
+    "video_id": "GRNI9T9R8gQ"
+  },
+  {
+    "chunk_id": 13,
+    "text": "Let's go back completely to the start. I will be explaining everything from the scratch using very easy sketches and examples and i will be sharing with you everything that i know. All my friends, one more last thing. If you really enjoy these type of tutorials where it's free and as well i sketch those complex concepts and you want more content this then support the channel by subscribing, liking, commenting. This can really help with the algorithm and going to support the channel by reaching others you and as well it can help me to make more content this. And of course, thank you so much for watching and i will see you in the next video.",
+    "word_count": 119,
+    "char_count": 647,
+    "video_id": "GRNI9T9R8gQ"
+  }
+]

@@ -1,0 +1,22 @@
+# Environment files
+# .env
+.environ/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+# .venv/
+# venv/
+# ENV/
+
+# # Local database
+# Backend/chroma_db/
+# Backend/chunks/
+# Backend/transcripts/
+
+# IDE settings
+.vscode/
+.idea/
