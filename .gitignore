@@ -1,5 +1,5 @@
 # Environment files
-# .env
+.env
 .environ/
 
 # Python cache
@@ -8,14 +8,19 @@ __pycache__/
 *$py.class
 
 # Virtual environments
-# .venv/
-# venv/
-# ENV/
+.venv/
+venv/
+ENV/
+env/
 
-# # Local database
-# Backend/chroma_db/
-# Backend/chunks/
-# Backend/transcripts/
+# Local database and application data
+Backend/chroma_db/
+Backend/chunks/
+Backend/transcripts/
+
+# SQLite databases
+*.db
+*.sqlite3
 
 # IDE settings
 .vscode/

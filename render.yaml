@@ -1,0 +1,32 @@
+services:
+  # PostgreSQL Database
+  - type: pserv
+    name: explainify-db
+    env: docker
+    plan: free
+    region: oregon
+    databaseName: explainify
+    databaseUser: postgres
+
+  # FastAPI Web Service
+  - type: web
+    name: explainify-backend
+    env: python
+    region: oregon
+    plan: free
+    branch: main
+    buildCommand: "cd Backend && chmod +x build.sh && ./build.sh"
+    startCommand: "cd Backend && uvicorn main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: GOOGLE_API_KEY
+        sync: false  # Set manually in Render dashboard
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: explainify-db
+          property: connectionString
+      - key: ALLOWED_ORIGINS
+        value: "*"  # Update with your frontend URL after deployment
