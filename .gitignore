@@ -2,6 +2,7 @@
 .env
 .environ/
 
+
 # Python cache
 __pycache__/
 *.py[cod]
