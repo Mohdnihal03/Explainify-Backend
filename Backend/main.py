@@ -55,6 +55,22 @@ async def startup_event():
         print("Please create a .env file with GOOGLE_API_KEY=your_key_here")
 
 
+# Health check endpoint for monitoring
+@app.get("/health")
+async def health_check():
+    """
+    Health check endpoint for monitoring and deployment verification.
+    Returns service status and timestamp.
+    """
+    from datetime import datetime
+    return {
+        "status": "healthy",
+        "service": "Explainify Backend",
+        "timestamp": datetime.now().isoformat(),
+        "version": "1.0.0"
+    }
+
+
 # Configure CORS (Cross-Origin Resource Sharing) middleware
 # This allows the frontend (running on a different port/domain) to make requests to this API
 
