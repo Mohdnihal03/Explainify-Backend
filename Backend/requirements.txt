@@ -27,3 +27,12 @@ chromadb
 
 # Sentence Transformers - For generating embeddings locally (optional if using Gemini)
 sentence-transformers
+
+# Database & Authentication
+sqlalchemy
+psycopg2-binary
+passlib[bcrypt]
+bcrypt==4.0.1
+python-jose[cryptography]
+python-multipart
+pydantic[email]
